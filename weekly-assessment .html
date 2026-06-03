@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Budget Assessment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; padding: 24px 16px 48px; }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #6e6e73; margin-bottom: 20px; }
+    .mode-bar { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .mode-bar label { font-size: 13px; font-weight: 600; color: #6e6e73; margin-right: 4px; }
+    .toggle-btn { padding: 7px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .toggle-btn.ft { background: #e8f0fe; color: #1A56A6; }
+    .toggle-btn.ft.active { background: #1A56A6; color: #fff; }
+    .toggle-btn.pt { background: #f3e8fd; color: #6B21A8; }
+    .toggle-btn.pt.active { background: #6B21A8; color: #fff; }
+    .week-bar { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex-wrap: wrap; }
+    .week-bar label { font-size: 13px; font-weight: 600; color: #6e6e73; }
+    .week-bar input[type="date"] { font-size: 13px; padding: 5px 9px; border: 1px solid #e5e5ea; border-radius: 7px; outline: none; background: #fafafa; }
+    .week-bar input[type="date"]:focus { border-color: #1A56A6; }
+    .week-label { font-size: 12px; color: #9e9ea0; margin-left: auto; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+    .summary-card { background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .summary-card .s-label { font-size: 11px; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .summary-card .s-value { font-size: 20px; font-weight: 700; }
+    .summary-card .s-sub { font-size: 11px; color: #9e9ea0; margin-top: 2px; }
+    .c-budget{color:#1A56A6;} .c-good{color:#1a7f4b;} .c-over{color:#cc0000;}
+    .progress-wrap { background: #e5e5ea; border-radius: 4px; height: 6px; margin-bottom: 16px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s, background 0.3s; }
+    .table-wrap { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 14px; }
+    .table-header { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 10px 14px; background: #f5f5f7; border-bottom: 1px solid #e5e5ea; }
+    .th { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.06em; }
+    .th.right { text-align: right; }
+    .expense-row { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 9px 14px; border-bottom: 0.5px solid #f0f0f5; transition: background 0.1s; }
+    .expense-row:last-child { border-bottom: none; }
+    .expense-row:hover { background: #fafafa; }
+    .exp-name { font-size: 14px; font-weight: 500; }
+    .exp-cat { font-size: 11px; color: #9e9ea0; margin-top: 1px; }
+    .budget-val { font-size: 13px; font-weight: 600; color: #6e6e73; text-align: right; }
+    .actual-input { width: 100%; text-align: right; font-size: 14px; font-weight: 500; padding: 5px 8px; border-radius: 7px; border: 1.5px solid #e5e5ea; outline: none; background: #fafafa; color: #1d1d1f; transition: all 0.15s; }
+    .actual-input:focus { border-color: #1A56A6; background: #fff; box-shadow: 0 0 0 3px rgba(26,86,166,0.1); }
+    .actual-input.over { border-color: #cc0000; background: #fff5f5; color: #cc0000; }
+    .actual-input.warn { border-color: #b45309; background: #fffbf0; }
+    .actual-input.good { border-color: #1a7f4b; background: #f0faf5; }
+    .diff-val { font-size: 13px; font-weight: 600; text-align: right; }
+    .diff-val.positive{color:#1a7f4b;} .diff-val.negative{color:#cc0000;} .diff-val.neutral{color:#9e9ea0;}
+    .totals-section { border-top: 2px solid #e5e5ea; background: #f5f5f7; }
+    .totals-row { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 10px 14px; border-bottom: 0.5px solid #e5e5ea; }
+    .totals-row:last-child { border-bottom: none; }
+    .totals-label { font-size: 13px; font-weight: 700; color: #1d1d1f; }
+    .totals-val { font-size: 14px; font-weight: 700; text-align: right; }
+    .notes-wrap { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .notes-wrap label { font-size: 13px; font-weight: 600; color: #6e6e73; display: block; margin-bottom: 6px; }
+    .notes-wrap textarea { width: 100%; font-size: 13px; color: #1d1d1f; border: 1px solid #e5e5ea; border-radius: 8px; padding: 8px 10px; resize: vertical; min-height: 70px; outline: none; font-family: inherit; background: #fafafa; }
+    .notes-wrap textarea:focus { border-color: #1A56A6; background: #fff; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .action-btn { flex: 1; min-width: 120px; padding: 11px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
+    .action-btn.save { background: #1A56A6; color: #fff; }
+    .action-btn.save:hover { background: #154789; }
+    .action-btn.clear { background: #f5f5f7; color: #6e6e73; border: 1px solid #e5e5ea; }
+    .action-btn.history { background: #f3e8fd; color: #6B21A8; }
+    .history-wrap { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: none; }
+    .history-wrap.visible { display: block; }
+    .history-wrap h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+    .history-entry { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid #f0f0f5; font-size: 13px; gap: 8px; }
+    .history-entry:last-child { border-bottom: none; }
+    .h-week { font-weight: 600; color: #1d1d1f; }
+    .h-mode { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .h-mode.ft { background: #e8f0fe; color: #1A56A6; }
+    .h-mode.pt { background: #f3e8fd; color: #6B21A8; }
+    .h-diff.positive{color:#1a7f4b;} .h-diff.negative{color:#cc0000;}
+    .h-load { font-size: 12px; color: #1A56A6; cursor: pointer; text-decoration: underline; white-space: nowrap; }
+    .h-del { font-size: 12px; color: #cc0000; cursor: pointer; margin-left: 6px; }
+    .no-history { font-size: 13px; color: #9e9ea0; text-align: center; padding: 16px 0; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    .toast.show { opacity: 1; }
+    .hint { font-size: 11px; color: #9e9ea0; text-align: center; }
+    @media (max-width: 520px) {
+      .table-header, .expense-row, .totals-row { grid-template-columns: 1fr 80px 95px 80px 60px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .summary-grid .summary-card:last-child { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Weekly Budget Assessment</h1>
+  <p class="subtitle">Track your actual spending against your monthly budget each week</p>
+  <div class="mode-bar">
+    <label>Employment:</label>
+    <button class="toggle-btn ft active" id="btn-ft" onclick="setMode('ft')">🟢 Full Time</button>
+    <button class="toggle-btn pt" id="btn-pt" onclick="setMode('pt')">🟣 Part Time</button>
+    <span id="mode-income" style="margin-left:auto;font-size:12px;color:#6e6e73;"></span>
+  </div>
+  <div class="week-bar">
+    <label>Week of:</label>
+    <input type="date" id="week-date" onchange="onWeekChange()" />
+    <span class="week-label" id="week-label"></span>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card"><div class="s-label">Weekly budget</div><div class="s-value c-budget" id="sum-budget">€0</div><div class="s-sub">monthly ÷ 4.33</div></div>
+    <div class="summary-card"><div class="s-label">Spent so far</div><div class="s-value" id="sum-spent">€0</div><div class="s-sub">entered this week</div></div>
+    <div class="summary-card"><div class="s-label">Remaining</div><div class="s-value" id="sum-remaining">€0</div><div class="s-sub" id="sum-remaining-sub"></div></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="progress-bar" style="width:0%;background:#1a7f4b;"></div></div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="th">Expense</div>
+      <div class="th right">Budget/wk</div>
+      <div class="th right">Actual spent</div>
+      <div class="th right">Difference</div>
+      <div class="th right">Status</div>
+    </div>
+    <div id="rows-container"></div>
+    <div class="totals-section">
+      <div class="totals-row">
+        <div class="totals-label">Total</div>
+        <div class="totals-val c-budget" id="tot-budget">€0</div>
+        <div class="totals-val" id="tot-spent">€0</div>
+        <div class="totals-val" id="tot-diff">€0</div>
+        <div class="totals-val" id="tot-status"></div>
+      </div>
+    </div>
+  </div>
+  <div class="notes-wrap">
+    <label>📝 Week notes</label>
+    <textarea id="week-notes" placeholder="Any notes about this week's spending..."></textarea>
+  </div>
+  <div class="actions">
+    <button class="action-btn save" onclick="saveWeek()">💾 Save this week</button>
+    <button class="action-btn clear" onclick="clearActuals()">🗑 Clear actuals</button>
+    <button class="action-btn history" onclick="toggleHistory()">📅 View history</button>
+  </div>
+  <div class="history-wrap" id="history-wrap">
+    <h3>Past weeks</h3>
+    <div id="history-list"></div>
+  </div>
+  <p class="hint">Weekly budget = monthly ÷ 4.33 · Saved in your browser</p>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const BUDGET_ITEMS = [
+    { id:1,  name:"Mortgage",                        amount:2500, amountPT:2500, category:"Fixed" },
+    { id:2,  name:"Groceries",                       amount:1000, amountPT:700,  category:"Food" },
+    { id:3,  name:"Childcare",                       amount:800,  amountPT:800,  category:"Family" },
+    { id:4,  name:"Internet",                        amount:50,   amountPT:50,   category:"Fixed" },
+    { id:5,  name:"Holidays sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:6,  name:"Clothing sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:7,  name:"Christmas & home insurance fund", amount:400,  amountPT:200,  category:"Fixed" },
+    { id:8,  name:"Electricity",                     amount:100,  amountPT:100,  category:"Utilities" },
+    { id:9,  name:"Health insurance",                amount:300,  amountPT:300,  category:"Fixed" },
+    { id:10, name:"Phone",                           amount:100,  amountPT:100,  category:"Utilities" },
+    { id:11, name:"Child costs",                     amount:150,  amountPT:150,  category:"Family" },
+    { id:12, name:"Kids' activities",                amount:150,  amountPT:75,   category:"Family" },
+    { id:13, name:"Eating out",                      amount:150,  amountPT:50,   category:"Food" },
+    { id:14, name:"Home maintenance sinking fund",   amount:100,  amountPT:50,   category:"Sinking Fund" },
+    { id:15, name:"Personal spending",               amount:750,  amountPT:200,  category:"Other" },
+    { id:16, name:"Gifts & socialising fund",        amount:150,  amountPT:0,    cate
