@@ -1,0 +1,521 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Budget Assessment</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; padding: 24px 16px 48px; }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #6e6e73; margin-bottom: 20px; }
+
+    .mode-bar { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .mode-bar label { font-size: 13px; font-weight: 600; color: #6e6e73; margin-right: 4px; }
+    .toggle-btn { padding: 7px 20px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .toggle-btn.ft { background: #e8f0fe; color: #1A56A6; }
+    .toggle-btn.ft.active { background: #1A56A6; color: #fff; }
+    .toggle-btn.pt { background: #f3e8fd; color: #6B21A8; }
+    .toggle-btn.pt.active { background: #6B21A8; color: #fff; }
+
+    .week-bar { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex-wrap: wrap; }
+    .week-bar label { font-size: 13px; font-weight: 600; color: #6e6e73; }
+    .week-bar input[type="date"] { font-size: 13px; padding: 5px 9px; border: 1px solid #e5e5ea; border-radius: 7px; outline: none; background: #fafafa; }
+    .week-bar input[type="date"]:focus { border-color: #1A56A6; }
+    .week-label { font-size: 12px; color: #9e9ea0; margin-left: auto; }
+
+    .balance-card { background: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #1A56A6; }
+    .balance-card .bal-title { font-size: 13px; font-weight: 700; color: #1d1d1f; margin-bottom: 10px; }
+    .balance-single { display: flex; align-items: center; gap: 12px; }
+    .bal-input { font-size: 18px; font-weight: 700; padding: 8px 10px; border-radius: 8px; border: 1.5px solid #e5e5ea; outline: none; background: #fafafa; color: #1A56A6; text-align: right; flex: 1; }
+    .bal-input:focus { border-color: #1A56A6; background: #fff; box-shadow: 0 0 0 3px rgba(26,86,166,0.1); }
+    .balance-change { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; display: none; }
+    .balance-change.positive { background: #f0faf5; color: #1a7f4b; border: 1px solid #a8e6c4; }
+    .balance-change.negative { background: #fff5f5; color: #cc0000; border: 1px solid #ffc9c9; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+    .summary-card { background: #fff; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .summary-card .s-label { font-size: 11px; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .summary-card .s-value { font-size: 18px; font-weight: 700; }
+    .summary-card .s-sub { font-size: 11px; color: #9e9ea0; margin-top: 2px; }
+    .c-income { color: #1a7f4b; }
+    .c-budget { color: #1A56A6; }
+    .c-good   { color: #1a7f4b; }
+    .c-over   { color: #cc0000; }
+
+    .progress-wrap { background: #e5e5ea; border-radius: 4px; height: 6px; margin-bottom: 16px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s, background 0.3s; }
+
+    .section-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 8px 14px; border-bottom: 1px solid #e5e5ea; }
+    .section-header.income-header  { background: #f0faf5; color: #1a7f4b; }
+    .section-header.expense-header { background: #f0f4ff; color: #1A56A6; }
+
+    .table-wrap { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 14px; }
+    .table-header { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 10px 14px; background: #f5f5f7; border-bottom: 1px solid #e5e5ea; }
+    .th { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.06em; }
+    .th.right { text-align: right; }
+
+    .expense-row     { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 9px 14px; border-bottom: 0.5px solid #f0f0f5; transition: background 0.1s; }
+    .expense-row:last-child { border-bottom: none; }
+    .expense-row:hover { background: #fafafa; }
+    .income-row-item { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 9px 14px; border-bottom: 0.5px solid #f0faf5; background: #fafffe; transition: background 0.1s; }
+    .income-row-item:hover { background: #f0faf5; }
+
+    .exp-name { font-size: 14px; font-weight: 500; }
+    .exp-cat  { font-size: 11px; color: #9e9ea0; margin-top: 1px; }
+    .budget-val { font-size: 13px; font-weight: 600; color: #6e6e73; text-align: right; }
+
+    .actual-input { width: 100%; text-align: right; font-size: 14px; font-weight: 500; padding: 5px 8px; border-radius: 7px; border: 1.5px solid #e5e5ea; outline: none; background: #fafafa; color: #1d1d1f; transition: all 0.15s; }
+    .actual-input:focus { border-color: #1A56A6; background: #fff; box-shadow: 0 0 0 3px rgba(26,86,166,0.1); }
+    .actual-input.over { border-color: #cc0000; background: #fff5f5; color: #cc0000; }
+    .actual-input.warn { border-color: #b45309; background: #fffbf0; }
+    .actual-input.good { border-color: #1a7f4b; background: #f0faf5; }
+    .income-input { width: 100%; text-align: right; font-size: 14px; font-weight: 500; padding: 5px 8px; border-radius: 7px; border: 1.5px solid #e5e5ea; outline: none; background: #fafafa; color: #1d1d1f; transition: all 0.15s; }
+    .income-input:focus { border-color: #1a7f4b; background: #fff; box-shadow: 0 0 0 3px rgba(26,127,75,0.1); }
+    .income-input.received { border-color: #1a7f4b; background: #f0faf5; color: #1a7f4b; }
+
+    .diff-val { font-size: 13px; font-weight: 600; text-align: right; }
+    .diff-val.positive { color: #1a7f4b; }
+    .diff-val.negative { color: #cc0000; }
+    .diff-val.neutral  { color: #9e9ea0; }
+
+    .totals-section { border-top: 2px solid #e5e5ea; background: #f5f5f7; }
+    .totals-row { display: grid; grid-template-columns: 1fr 100px 110px 100px 80px; gap: 6px; align-items: center; padding: 10px 14px; border-bottom: 0.5px solid #e5e5ea; }
+    .totals-row:last-child { border-bottom: none; }
+    .totals-label { font-size: 13px; font-weight: 700; color: #1d1d1f; }
+    .totals-val { font-size: 14px; font-weight: 700; text-align: right; }
+    .totals-row.net-row { background: #f0f4ff; }
+    .totals-row.net-row .totals-label { color: #1A56A6; }
+
+    .add-income-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; background: #f0faf5; border: 1px dashed #1a7f4b; border-radius: 0; padding: 9px 14px; cursor: pointer; color: #1a7f4b; width: 100%; transition: all 0.15s; }
+    .add-income-btn:hover { background: #e0f5eb; }
+
+    .notes-wrap { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .notes-wrap label { font-size: 13px; font-weight: 600; color: #6e6e73; display: block; margin-bottom: 6px; }
+    .notes-wrap textarea { width: 100%; font-size: 13px; color: #1d1d1f; border: 1px solid #e5e5ea; border-radius: 8px; padding: 8px 10px; resize: vertical; min-height: 70px; outline: none; font-family: inherit; background: #fafafa; }
+    .notes-wrap textarea:focus { border-color: #1A56A6; background: #fff; }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .action-btn { flex: 1; min-width: 120px; padding: 11px 16px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s; }
+    .action-btn.save    { background: #1A56A6; color: #fff; }
+    .action-btn.save:hover { background: #154789; }
+    .action-btn.clear   { background: #f5f5f7; color: #6e6e73; border: 1px solid #e5e5ea; }
+    .action-btn.history { background: #f3e8fd; color: #6B21A8; }
+
+    .history-wrap { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: none; }
+    .history-wrap.visible { display: block; }
+    .history-wrap h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+    .history-entry { padding: 10px 0; border-bottom: 0.5px solid #f0f0f5; font-size: 13px; }
+    .history-entry:last-child { border-bottom: none; }
+    .history-entry-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .h-week { font-weight: 600; color: #1d1d1f; }
+    .h-mode { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .h-mode.ft { background: #e8f0fe; color: #1A56A6; }
+    .h-mode.pt { background: #f3e8fd; color: #6B21A8; }
+    .history-entry-stats { display: flex; gap: 12px; font-size: 12px; color: #6e6e73; flex-wrap: wrap; }
+    .h-bal { font-weight: 700; color: #1A56A6; }
+    .h-bal-change.positive { color: #1a7f4b; font-weight: 600; }
+    .h-bal-change.negative { color: #cc0000; font-weight: 600; }
+    .h-load { font-size: 12px; color: #1A56A6; cursor: pointer; text-decoration: underline; margin-left: auto; }
+    .h-del  { font-size: 12px; color: #cc0000; cursor: pointer; margin-left: 8px; }
+    .no-history { font-size: 13px; color: #9e9ea0; text-align: center; padding: 16px 0; }
+
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1d1d1f; color: #fff; font-size: 13px; font-weight: 500; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    .toast.show { opacity: 1; }
+    .hint { font-size: 11px; color: #9e9ea0; text-align: center; }
+
+    @media (max-width: 560px) {
+      .table-header, .expense-row, .income-row-item, .totals-row { grid-template-columns: 1fr 75px 90px 75px 60px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Weekly Budget Assessment</h1>
+  <p class="subtitle">Track income, spending and account balance week by week</p>
+
+  <div class="mode-bar">
+    <label>Employment:</label>
+    <button class="toggle-btn ft active" id="btn-ft" onclick="setMode('ft')">🟢 Full Time</button>
+    <button class="toggle-btn pt" id="btn-pt" onclick="setMode('pt')">🟣 Part Time</button>
+    <span id="mode-income" style="margin-left:auto;font-size:12px;color:#6e6e73;"></span>
+  </div>
+
+  <div class="week-bar">
+    <label>Week of:</label>
+    <input type="date" id="week-date" onchange="onWeekChange()" />
+    <span class="week-label" id="week-label"></span>
+  </div>
+
+  <div class="balance-card">
+    <div class="bal-title">🏦 Current Account Balance</div>
+    <div class="balance-single">
+      <input class="bal-input" type="number" id="bal-current" placeholder="0.00" step="0.01" oninput="onBalanceChange()" />
+      <span style="font-size:12px;color:#6e6e73;">Enter your balance now</span>
+    </div>
+    <div class="balance-change" id="balance-change"></div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card"><div class="s-label">Income received</div><div class="s-value c-income" id="sum-received">€0</div><div class="s-sub">this week</div></div>
+    <div class="summary-card"><div class="s-label">Spent</div><div class="s-value c-budget" id="sum-spent">€0</div><div class="s-sub">this week</div></div>
+    <div class="summary-card"><div class="s-label">Net cashflow</div><div class="s-value" id="sum-net">€0</div><div class="s-sub" id="sum-net-sub"></div></div>
+    <div class="summary-card"><div class="s-label">Balance change</div><div class="s-value" id="sum-bal-change">—</div><div class="s-sub" id="sum-bal-sub">vs last week</div></div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-fill" id="progress-bar" style="width:0%;background:#1a7f4b;"></div></div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="th">Item</div>
+      <div class="th right"></div>
+      <div class="th right">Actual</div>
+      <div class="th right">Difference</div>
+      <div class="th right">Status</div>
+    </div>
+    <div class="section-header income-header">💰 Income</div>
+    <div id="income-rows"></div>
+    <button class="add-income-btn" onclick="addIncomeItem()">+ Add income source</button>
+    <div class="section-header expense-header">💸 Expenses</div>
+    <div id="expense-rows"></div>
+    <div class="totals-section">
+      <div class="totals-row">
+        <div class="totals-label">Total income</div>
+        <div class="totals-val c-income" id="tot-inc-expected">€0</div>
+        <div class="totals-val c-income" id="tot-inc-actual">€0</div>
+        <div class="totals-val" id="tot-inc-diff">—</div>
+        <div class="totals-val"></div>
+      </div>
+      <div class="totals-row">
+        <div class="totals-label">Total expenses</div>
+        <div class="totals-val c-budget" id="tot-exp-expected">€0</div>
+        <div class="totals-val c-budget" id="tot-exp-actual">€0</div>
+        <div class="totals-val" id="tot-exp-diff">—</div>
+        <div class="totals-val" id="tot-exp-status"></div>
+      </div>
+      <div class="totals-row net-row">
+        <div class="totals-label">Net position</div>
+        <div class="totals-val" id="tot-net-expected">€0</div>
+        <div class="totals-val" id="tot-net-actual">€0</div>
+        <div class="totals-val" id="tot-net-diff">—</div>
+        <div class="totals-val"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes-wrap">
+    <label>📝 Week notes</label>
+    <textarea id="week-notes" placeholder="Any notes about this week..."></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="action-btn save"    onclick="saveWeek()">💾 Save this week</button>
+    <button class="action-btn clear"   onclick="clearAll()">🗑 Clear all</button>
+    <button class="action-btn history" onclick="toggleHistory()">📅 View history</button>
+  </div>
+
+  <div class="history-wrap" id="history-wrap">
+    <h3>Past weeks</h3>
+    <div id="history-list"></div>
+  </div>
+
+  <p class="hint">Weekly figures = monthly ÷ 4.33 · Everything saves in your browser</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  const EXPENSE_ITEMS = [
+    { id:1,  name:"Mortgage",                        amount:2500, amountPT:2500, category:"Fixed" },
+    { id:2,  name:"Groceries",                       amount:1000, amountPT:700,  category:"Food" },
+    { id:3,  name:"Childcare",                       amount:800,  amountPT:800,  category:"Family" },
+    { id:4,  name:"Internet",                        amount:50,   amountPT:50,   category:"Fixed" },
+    { id:5,  name:"Holidays sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:6,  name:"Clothing sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:7,  name:"Christmas & home insurance fund", amount:400,  amountPT:200,  category:"Fixed" },
+    { id:8,  name:"Electricity",                     amount:100,  amountPT:100,  category:"Utilities" },
+    { id:9,  name:"Health insurance",                amount:300,  amountPT:300,  category:"Fixed" },
+    { id:10, name:"Phone",                           amount:100,  amountPT:100,  category:"Utilities" },
+    { id:11, name:"Child costs",                     amount:150,  amountPT:150,  category:"Family" },
+    { id:12, name:"Kids' activities",                amount:150,  amountPT:75,   category:"Family" },
+    { id:13, name:"Eating out",                      amount:150,  amountPT:50,   category:"Food" },
+    { id:14, name:"Home maintenance sinking fund",   amount:100,  amountPT:50,   category:"Sinking Fund" },
+    { id:15, name:"Personal spending",               amount:750,  amountPT:200,  category:"Other" },
+    { id:16, name:"Gifts & socialising fund",        amount:150,  amountPT:0,    category:"Sinking Fund" },
+  ];
+
+  const DEFAULT_INCOME_SOURCES = [
+    { id:"inc1", name:"Your contract salary", monthlyFT:2839, monthlyPT:0    },
+    { id:"inc2", name:"Wife's salary",         monthlyFT:3894, monthlyPT:3894 },
+    { id:"inc3", name:"Rental income",         monthlyFT:1300, monthlyPT:1300 },
+  ];
+
+  const WEEKS = 4.33;
+  let mode = "ft";
+  let actuals = {}, incomeActuals = {};
+  let incomeSources = JSON.parse(JSON.stringify(DEFAULT_INCOME_SOURCES));
+  let balCurrent = null;
+
+  function fmt(n)       { return "€" + Math.abs(Math.round(n)).toLocaleString("en-IE"); }
+  function fmtSigned(n) { return (n >= 0 ? "+" : "−") + fmt(n); }
+  function escHtml(s)   { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function setMode(m) {
+    mode = m; localStorage.setItem("weekly-mode", m);
+    document.getElementById("btn-ft").classList.toggle("active", m==="ft");
+    document.getElementById("btn-pt").classList.toggle("active", m==="pt");
+    const mi = incomeSources.reduce((s,i)=>s+(m==="ft"?i.monthlyFT:i.monthlyPT),0);
+    document.getElementById("mode-income").textContent = "Expected monthly: " + fmt(mi);
+    render();
+  }
+
+  function getMonday(d) { const x=new Date(d),day=x.getDay(),diff=x.getDate()-day+(day===0?-6:1); x.setDate(diff); return x; }
+  function weekKey(d)   { return getMonday(d).toISOString().split("T")[0]; }
+  function formatWeekLabel(s) {
+    const mon=new Date(s+"T00:00:00"),sun=new Date(mon); sun.setDate(mon.getDate()+6);
+    const o={day:"numeric",month:"short"};
+    return mon.toLocaleDateString("en-IE",o)+" – "+sun.toLocaleDateString("en-IE",o);
+  }
+  function onWeekChange() {
+    const v=document.getElementById("week-date").value; if(!v)return;
+    const key=weekKey(new Date(v+"T00:00:00"));
+    localStorage.setItem("weekly-current-week",key); loadWeekData(key);
+  }
+  function currentWeekKey() {
+    const v=document.getElementById("week-date").value;
+    return v ? weekKey(new Date(v+"T00:00:00")) : weekKey(new Date());
+  }
+  function getPreviousWeekBalance(currentKey) {
+    const index=JSON.parse(localStorage.getItem("weekly-index")||"[]");
+    const sorted=index.filter(k=>k<currentKey).sort().reverse();
+    if(sorted.length===0) return null;
+    const prev=JSON.parse(localStorage.getItem("weekly-entry-"+sorted[0])||"null");
+    return prev ? { key:sorted[0], balCurrent:prev.balCurrent } : null;
+  }
+  function loadWeekData(key) {
+    document.getElementById("week-label").textContent="Week of "+formatWeekLabel(key);
+    const saved=localStorage.getItem("weekly-entry-"+key);
+    if(saved) {
+      const d=JSON.parse(saved);
+      actuals=d.actuals||{}; incomeActuals=d.incomeActuals||{};
+      if(d.incomeSources) incomeSources=d.incomeSources;
+      balCurrent=d.balCurrent!==undefined?d.balCurrent:null;
+      document.getElementById("week-notes").value=d.notes||"";
+      if(d.mode){mode=d.mode;document.getElementById("btn-ft").classList.toggle("active",mode==="ft");document.getElementById("btn-pt").classList.toggle("active",mode==="pt");}
+    } else {
+      actuals={}; incomeActuals={};
+      incomeSources=JSON.parse(JSON.stringify(DEFAULT_INCOME_SOURCES));
+      balCurrent=null;
+      document.getElementById("week-notes").value="";
+    }
+    document.getElementById("bal-current").value=balCurrent!==null?balCurrent:"";
+    render();
+  }
+
+  function onBalanceChange() {
+    balCurrent=document.getElementById("bal-current").value!==""?parseFloat(document.getElementById("bal-current").value):null;
+    updateBalanceChange();
+    updateSummaryCards();
+  }
+
+  function updateBalanceChange() {
+    const el=document.getElementById("balance-change");
+    const prev=getPreviousWeekBalance(currentWeekKey());
+    if(balCurrent!==null && prev && prev.balCurrent!==null) {
+      const diff=balCurrent-prev.balCurrent;
+      el.style.display="block";
+      el.className="balance-change "+(diff>=0?"positive":"negative");
+      el.textContent=`vs last week: ${diff>=0?"+":"−"}€${Math.abs(diff).toFixed(2)} (last week was €${prev.balCurrent.toFixed(2)})`;
+    } else { el.style.display="none"; }
+  }
+
+  function render() {
+    renderIncome(); renderExpenses(); updateTotals(); updateBalanceChange();
+    const mi=incomeSources.reduce((s,i)=>s+(mode==="ft"?i.monthlyFT:i.monthlyPT),0);
+    document.getElementById("mode-income").textContent="Expected monthly: "+fmt(mi);
+  }
+
+  function renderIncome() {
+    const container=document.getElementById("income-rows"); container.innerHTML="";
+    incomeSources.forEach((src,idx)=>{
+      const weekly=(mode==="ft"?src.monthlyFT:src.monthlyPT)/WEEKS;
+      const actual=incomeActuals[src.id]!==undefined?incomeActuals[src.id]:"";
+      const actualVal=actual===""?null:parseFloat(actual);
+      const diff=actualVal!==null?actualVal-weekly:null;
+      const inputClass=actualVal!==null?"received":"";
+      let statusText="–",statusColor="#9e9ea0";
+      if(actualVal!==null){const pct=weekly>0?actualVal/weekly:1;if(pct>=1){statusText="✓ Received";statusColor="#1a7f4b";}else if(pct>=0.5){statusText="⚠ Partial";statusColor="#b45309";}else{statusText="✕ Pending";statusColor="#cc0000";}}
+      const row=document.createElement("div"); row.className="income-row-item";
+      row.innerHTML=`<div><div class="exp-name">${escHtml(src.name)}</div><div class="exp-cat">Income</div></div><div class="budget-val"></div><input class="income-input ${inputClass}" type="number" min="0" step="0.01" placeholder="0.00" value="${actual}" data-id="${src.id}"/><div class="diff-val ${diff===null?"neutral":diff>=0?"positive":"negative"}">${diff===null?"–":fmtSigned(diff)}</div><div style="text-align:right;font-size:12px;font-weight:600;color:${statusColor};">${statusText}</div>`;
+      container.appendChild(row);
+      row.querySelector("input").addEventListener("input",e=>{
+        const val=e.target.value;
+        incomeActuals[src.id]=val===""?undefined:parseFloat(val)||0;
+        if(incomeActuals[src.id]===undefined) delete incomeActuals[src.id];
+        render();
+        const fresh=document.querySelectorAll("#income-rows input");
+        if(fresh[idx]){fresh[idx].focus();fresh[idx].value=val;}
+      });
+    });
+  }
+
+  function renderExpenses() {
+    const container=document.getElementById("expense-rows"); container.innerHTML="";
+    EXPENSE_ITEMS.forEach((item,idx)=>{
+      const monthly=mode==="ft"?item.amount:item.amountPT;
+      const weekly=monthly/WEEKS;
+      const actual=actuals[item.id]!==undefined?actuals[item.id]:"";
+      const actualVal=actual===""?null:parseFloat(actual);
+      const diff=actualVal!==null?weekly-actualVal:null;
+      let statusText="–",statusColor="#9e9ea0",inputClass="";
+      if(actualVal!==null){const pct=weekly>0?actualVal/weekly:0;if(pct<=0.85){statusText="✓ Good";statusColor="#1a7f4b";inputClass="good";}else if(pct<=1.0){statusText="⚠ Close";statusColor="#b45309";inputClass="warn";}else{statusText="✕ Over";statusColor="#cc0000";inputClass="over";}}
+      const row=document.createElement("div"); row.className="expense-row";
+      row.innerHTML=`<div><div class="exp-name">${escHtml(item.name)}</div><div class="exp-cat">${escHtml(item.category)}</div></div><div class="budget-val"></div><input class="actual-input ${inputClass}" type="number" min="0" step="0.01" placeholder="0.00" value="${actual}" data-id="${item.id}"/><div class="diff-val ${diff===null?"neutral":diff>=0?"positive":"negative"}">${diff===null?"–":fmtSigned(diff)}</div><div style="text-align:right;font-size:12px;font-weight:600;color:${statusColor};">${statusText}</div>`;
+      container.appendChild(row);
+      row.querySelector("input").addEventListener("input",e=>{
+        const val=e.target.value;
+        actuals[item.id]=val===""?undefined:parseFloat(val)||0;
+        if(actuals[item.id]===undefined) delete actuals[item.id];
+        render();
+        const fresh=document.querySelectorAll("#expense-rows input");
+        if(fresh[idx]){fresh[idx].focus();fresh[idx].value=val;}
+      });
+    });
+  }
+
+  function updateSummaryCards() {
+    const incActual=Object.values(incomeActuals).reduce((s,v)=>s+(v||0),0);
+    const expActual=Object.values(actuals).reduce((s,v)=>s+(v||0),0);
+    const net=incActual-expActual;
+    document.getElementById("sum-received").textContent="€"+incActual.toFixed(2);
+    document.getElementById("sum-spent").textContent="€"+expActual.toFixed(2);
+    const netEl=document.getElementById("sum-net");
+    netEl.textContent=(net>=0?"+":"−")+"€"+Math.abs(net).toFixed(2);
+    netEl.className="s-value "+(net>=0?"c-good":"c-over");
+    document.getElementById("sum-net-sub").textContent=net>=0?"in the black":"in the red";
+    const prevBal=getPreviousWeekBalance(currentWeekKey());
+    const balEl=document.getElementById("sum-bal-change");
+    const balSub=document.getElementById("sum-bal-sub");
+    if(balCurrent!==null && prevBal && prevBal.balCurrent!==null) {
+      const diff=balCurrent-prevBal.balCurrent;
+      balEl.textContent=(diff>=0?"+":"−")+"€"+Math.abs(diff).toFixed(2);
+      balEl.className="s-value "+(diff>=0?"c-good":"c-over");
+      balSub.textContent="vs "+formatWeekLabel(prevBal.key).split("–")[0].trim();
+    } else if(balCurrent!==null) {
+      balEl.textContent="€"+balCurrent.toFixed(2);
+      balEl.className="s-value c-budget";
+      balSub.textContent="no prior week yet";
+    } else {
+      balEl.textContent="—"; balEl.className="s-value"; balSub.textContent="enter balance above";
+    }
+  }
+
+  function updateTotals() {
+    const incExpected=incomeSources.reduce((s,i)=>s+(mode==="ft"?i.monthlyFT:i.monthlyPT)/WEEKS,0);
+    const incActual=Object.values(incomeActuals).reduce((s,v)=>s+(v||0),0);
+    const expExpected=EXPENSE_ITEMS.reduce((s,i)=>s+(mode==="ft"?i.amount:i.amountPT)/WEEKS,0);
+    const expActual=Object.values(actuals).reduce((s,v)=>s+(v||0),0);
+    const expPct=expExpected>0?Math.min(100,(expActual/expExpected)*100):0;
+    const bar=document.getElementById("progress-bar");
+    bar.style.width=expPct+"%";
+    bar.style.background=expPct<=85?"#1a7f4b":expPct<=100?"#b45309":"#cc0000";
+    document.getElementById("tot-inc-expected").textContent="";
+    document.getElementById("tot-inc-actual").textContent="€"+incActual.toFixed(2);
+    const tid=document.getElementById("tot-inc-diff");
+    const incDiff=incActual-incExpected;
+    tid.textContent=(incDiff>=0?"+":"−")+"€"+Math.abs(incDiff).toFixed(2);
+    tid.className="totals-val "+(incDiff>=0?"c-good":"c-over");
+    document.getElementById("tot-exp-expected").textContent="";
+    document.getElementById("tot-exp-actual").textContent="€"+expActual.toFixed(2);
+    const ted=document.getElementById("tot-exp-diff");
+    const expDiff=expExpected-expActual;
+    ted.textContent=(expDiff>=0?"+":"−")+"€"+Math.abs(expDiff).toFixed(2);
+    ted.className="totals-val "+(expDiff>=0?"c-good":"c-over");
+    const tes=document.getElementById("tot-exp-status");
+    if(expPct<=85){tes.textContent="✓ On track";tes.style.color="#1a7f4b";}
+    else if(expPct<=100){tes.textContent="⚠ Nearly";tes.style.color="#b45309";}
+    else{tes.textContent="✕ Over";tes.style.color="#cc0000";}
+    const netExp=incExpected-expExpected,netAct=incActual-expActual;
+    document.getElementById("tot-net-expected").textContent="";
+    const tna=document.getElementById("tot-net-actual");
+    tna.textContent=(netAct>=0?"+":"−")+"€"+Math.abs(netAct).toFixed(2);
+    tna.className="totals-val "+(netAct>=0?"c-good":"c-over");
+    document.getElementById("tot-net-diff").textContent="";
+    updateSummaryCards();
+  }
+
+  function addIncomeItem() {
+    const name=prompt("Income source name:"); if(!name)return;
+    const monthly=parseFloat(prompt("Expected monthly amount (€):"))||0;
+    incomeSources.push({id:"inc_"+Date.now(),name,monthlyFT:monthly,monthlyPT:monthly});
+    render();
+  }
+
+  function saveWeek() {
+    const key=currentWeekKey(),notes=document.getElementById("week-notes").value;
+    const incExpected=incomeSources.reduce((s,i)=>s+(mode==="ft"?i.monthlyFT:i.monthlyPT)/WEEKS,0);
+    const incActual=Object.values(incomeActuals).reduce((s,v)=>s+(v||0),0);
+    const expExpected=EXPENSE_ITEMS.reduce((s,i)=>s+(mode==="ft"?i.amount:i.amountPT)/WEEKS,0);
+    const expActual=Object.values(actuals).reduce((s,v)=>s+(v||0),0);
+    const entry={week:key,mode,actuals:{...actuals},incomeActuals:{...incomeActuals},incomeSources,notes,incExpected,incActual,expExpected,expActual,balCurrent,savedAt:new Date().toISOString()};
+    localStorage.setItem("weekly-entry-"+key,JSON.stringify(entry));
+    let index=JSON.parse(localStorage.getItem("weekly-index")||"[]");
+    if(!index.includes(key)){index.push(key);index.sort().reverse();}
+    localStorage.setItem("weekly-index",JSON.stringify(index));
+    showToast("✓ Week saved!"); renderHistory();
+  }
+
+  function clearAll() {
+    if(!confirm("Clear all data for this week?"))return;
+    actuals={}; incomeActuals={};
+    incomeSources=JSON.parse(JSON.stringify(DEFAULT_INCOME_SOURCES));
+    balCurrent=null;
+    document.getElementById("bal-current").value="";
+    document.getElementById("week-notes").value="";
+    render(); showToast("Cleared");
+  }
+
+  function toggleHistory(){const w=document.getElementById("history-wrap");w.classList.toggle("visible");if(w.classList.contains("visible"))renderHistory();}
+  function renderHistory(){
+    const index=JSON.parse(localStorage.getItem("weekly-index")||"[]");
+    const list=document.getElementById("history-list");
+    if(index.length===0){list.innerHTML='<p class="no-history">No saved weeks yet.</p>';return;}
+    list.innerHTML="";
+    let prevBalClose=null;
+    const sorted=[...index].sort();
+    sorted.forEach(key=>{
+      const data=JSON.parse(localStorage.getItem("weekly-entry-"+key)||"null"); if(!data)return;
+      const net=(data.incActual||0)-(data.expActual||0);
+      const balChange=data.balCurrent!==null&&data.balCurrent!==undefined&&prevBalClose!==null?data.balCurrent-prevBalClose:null;
+      const entry=document.createElement("div"); entry.className="history-entry";
+      let balStr="";
+      if(data.balCurrent!==null&&data.balCurrent!==undefined) balStr+=`<span>🏦 Balance: <strong class="h-bal">€${parseFloat(data.balCurrent).toFixed(2)}</strong></span>`;
+      if(balChange!==null) balStr+=`<span>vs prev: <span class="h-bal-change ${balChange>=0?"positive":"negative"}">${balChange>=0?"+":"−"}€${Math.abs(balChange).toFixed(2)}</span></span>`;
+      entry.innerHTML=`<div class="history-entry-top"><span class="h-week">${formatWeekLabel(key)}</span><span class="h-mode ${data.mode}">${data.mode.toUpperCase()}</span><span class="h-load" data-key="${key}">Load</span><span class="h-del" data-key="${key}">✕</span></div><div class="history-entry-stats"><span>💰 In: €${(data.incActual||0).toFixed(2)}</span><span>💸 Out: €${(data.expActual||0).toFixed(2)}</span><span>Net: <span class="${net>=0?"c-good":"c-over"}">${net>=0?"+":"−"}€${Math.abs(net).toFixed(2)}</span></span>${balStr}</div>`;
+      entry.querySelector(".h-load").addEventListener("click",()=>loadHistoryEntry(key));
+      entry.querySelector(".h-del").addEventListener("click",()=>deleteHistoryEntry(key));
+      list.appendChild(entry);
+      if(data.balCurrent!==null&&data.balCurrent!==undefined) prevBalClose=parseFloat(data.balCurrent);
+    });
+    const entries=[...list.querySelectorAll(".history-entry")];
+    entries.reverse().forEach(e=>list.appendChild(e));
+  }
+
+  function loadHistoryEntry(key){document.getElementById("week-date").value=key;loadWeekData(key);document.getElementById("history-wrap").classList.remove("visible");showToast("Loaded week of "+formatWeekLabel(key));}
+  function deleteHistoryEntry(key){if(!confirm("Delete this week's entry?"))return;localStorage.removeItem("weekly-entry-"+key);let index=JSON.parse(localStorage.getItem("weekly-index")||"[]");index=index.filter(k=>k!==key);localStorage.setItem("weekly-index",JSON.stringify(index));renderHistory();showToast("Entry deleted");}
+  function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
+
+  function init(){
+    const mon=getMonday(new Date());const key=mon.toISOString().split("T")[0];
+    document.getElementById("week-date").value=key;
+    const savedMode=localStorage.getItem("weekly-mode")||"ft";
+    setMode(savedMode);loadWeekData(key);
+  }
+  init();
+</script>
+</body>
+</html>
+
