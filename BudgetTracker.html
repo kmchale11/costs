@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +9,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; padding: 24px 16px; }
-    <h1 style="color: black; font-size: 30px;">TEST - If you see this, HTML is loading</h1>
     .container { max-width: 680px; margin: 0 auto; }
     h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; }
     .subtitle { font-size: 13px; color: #6e6e73; margin-bottom: 20px; }
@@ -22,4 +23,151 @@
     .income-card .sub { font-size: 11px; color: #9e9ea0; margin-top: 3px; }
     .table-wrap { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 12px; }
     .table-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f5f5f7; border-bottom: 1px solid #e5e5ea; }
-    .table-header .col-nam
+    .table-header .col-name { flex: 1; font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.06em; }
+    .table-header .col-ft  { width: 96px; text-align: right; font-size: 11px; font-weight: 700; color: #1A56A6; text-transform: uppercase; letter-spacing: 0.06em; }
+    .table-header .col-pt  { width: 96px; text-align: right; font-size: 11px; font-weight: 700; color: #6B21A8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .table-header .col-del { width: 30px; }
+    .expense-row { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 0.5px solid #e5e5ea; transition: background 0.15s; }
+    .expense-row:last-child { border-bottom: none; }
+    .expense-row:hover { background: #fafafa; }
+    .row-name-wrap { flex: 1; min-width: 0; }
+    .row-name { font-size: 14px; font-weight: 500; width: 100%; background: transparent; border: none; outline: none; color: #1d1d1f; padding: 0; }
+    .row-name:focus { background: #f0f0f5; border-radius: 4px; padding: 1px 4px; }
+    .row-cat { font-size: 11px; color: #9e9ea0; margin-top: 1px; }
+    .amount-input { width: 96px; text-align: right; font-size: 14px; font-weight: 500; padding: 5px 7px; border-radius: 7px; border: 1.5px solid transparent; outline: none; transition: all 0.15s; }
+    .amount-input.ft-input { background: #EEF4FF; border-color: #1A56A6; color: #1A56A6; }
+    .amount-input.ft-input:focus { box-shadow: 0 0 0 3px rgba(26,86,166,0.15); }
+    .amount-input.pt-input { background: #F5EEFF; border-color: #6B21A8; color: #6B21A8; }
+    .amount-input.pt-input:focus { box-shadow: 0 0 0 3px rgba(107,33,168,0.15); }
+    .amount-input.pt-zero { background: #f5f5f7; border-color: #e5e5ea; color: #9e9ea0; }
+    .del-btn { width: 30px; height: 30px; border: none; background: none; cursor: pointer; border-radius: 6px; color: #9e9ea0; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+    .del-btn:hover { background: #ffe5e5; color: #d00; }
+    .totals-section { border-top: 2px solid #e5e5ea; }
+    .totals-row { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 0.5px solid #e5e5ea; background: #f5f5f7; }
+    .totals-row:last-child { border-bottom: none; }
+    .totals-label { flex: 1; font-size: 13px; font-weight: 600; color: #1d1d1f; }
+    .totals-row.surplus .totals-label { color: #6e6e73; }
+    .total-val { width: 96px; text-align: right; font-size: 15px; font-weight: 700; }
+    .total-val.ft { color: #1A56A6; }
+    .total-val.pt { color: #6B21A8; }
+    .total-val.positive { color: #1a7f4b; }
+    .total-val.negative { color: #d00; }
+    .spacer { width: 30px; }
+    .income-row { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #f5f5f7; border-bottom: 0.5px solid #e5e5ea; }
+    .income-row .totals-label { color: #6e6e73; font-weight: 500; font-size: 12px; }
+    .add-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; background: #fff; border: 1px dashed #c7c7cc; border-radius: 10px; padding: 10px 14px; cursor: pointer; color: #1A56A6; width: 100%; transition: all 0.15s; }
+    .add-btn:hover { background: #EEF4FF; border-color: #1A56A6; }
+    .add-form { background: #fff; border: 1.5px solid #1A56A6; border-radius: 12px; padding: 14px; display: none; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+    .add-form.visible { display: flex; }
+    .add-form input, .add-form select { font-size: 13px; padding: 6px 9px; border: 1px solid #e5e5ea; border-radius: 7px; outline: none; background: #fafafa; }
+    .add-form input:focus, .add-form select:focus { border-color: #1A56A6; background: #fff; }
+    .add-form .name-input { flex: 2; min-width: 120px; }
+    .add-form .amt-input  { width: 80px; }
+    .form-btn { font-size: 13px; font-weight: 500; padding: 6px 14px; border-radius: 7px; border: none; cursor: pointer; }
+    .form-btn.primary { background: #1A56A6; color: #fff; }
+    .form-btn.secondary { background: #f5f5f7; color: #6e6e73; }
+    .hint { font-size: 11px; color: #9e9ea0; margin-top: 12px; text-align: center; }
+    @media (max-width: 480px) {
+      .income-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .income-card .value { font-size: 18px; }
+      .amount-input { width: 80px; }
+      .table-header .col-ft, .table-header .col-pt { width: 80px; }
+      .total-val { width: 80px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Monthly Budget Tracker</h1>
+  <p class="subtitle">Edit any amount inline · Changes save automatically to your browser</p>
+  <div class="income-grid">
+    <div class="income-card ft"><div class="label">Full Time income</div><div class="value">€8,033</div><div class="sub">your salary + wife + rental</div></div>
+    <div class="income-card pt"><div class="label">Part Time income</div><div class="value">€5,194</div><div class="sub">wife + rental only</div></div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="col-name">Expense</div>
+      <div class="col-ft">🟢 FT</div>
+      <div class="col-pt">🟣 PT</div>
+      <div class="col-del"></div>
+    </div>
+    <div id="rows-container"></div>
+    <div class="totals-section">
+      <div class="income-row"><div class="totals-label">Monthly income</div><div class="total-val ft">€8,033</div><div class="total-val pt">€5,194</div><div class="spacer"></div></div>
+      <div class="totals-row"><div class="totals-label">Total expenses</div><div class="total-val ft" id="ft-total">€0</div><div class="total-val pt" id="pt-total">€0</div><div class="spacer"></div></div>
+      <div class="totals-row surplus"><div class="totals-label">Surplus / deficit</div><div class="total-val" id="ft-surplus">€0</div><div class="total-val" id="pt-surplus">€0</div><div class="spacer"></div></div>
+    </div>
+  </div>
+  <div class="add-form" id="add-form">
+    <input class="name-input" type="text" id="new-name" placeholder="Expense name" />
+    <input class="amt-input" type="number" id="new-ft" placeholder="FT €" min="0" />
+    <input class="amt-input" type="number" id="new-pt" placeholder="PT €" min="0" />
+    <select id="new-cat"><option>Fixed</option><option>Food</option><option>Family</option><option>Transport</option><option>Utilities</option><option>Leisure</option><option>Sinking Fund</option><option selected>Other</option></select>
+    <button class="form-btn primary" onclick="addItem()">Add</button>
+    <button class="form-btn secondary" onclick="hideAddForm()">Cancel</button>
+  </div>
+  <button class="add-btn" id="add-trigger" onclick="showAddForm()"><span style="font-size:18px">+</span> Add expense</button>
+  <p class="hint">All amounts editable inline · Set PT to 0 to pause an expense · Data saved in your browser</p>
+</div>
+<script>
+  const FT_INCOME = 8033, PT_INCOME = 5194;
+  const DEFAULT_ITEMS = [
+    { id:1,  name:"Mortgage",                        amount:2500, amountPT:2500, category:"Fixed" },
+    { id:2,  name:"Groceries",                       amount:1000, amountPT:700,  category:"Food" },
+    { id:3,  name:"Childcare",                       amount:800,  amountPT:800,  category:"Family" },
+    { id:4,  name:"Internet",                        amount:50,   amountPT:50,   category:"Fixed" },
+    { id:5,  name:"Holidays sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:6,  name:"Clothing sinking fund",           amount:400,  amountPT:0,    category:"Leisure" },
+    { id:7,  name:"Christmas & home insurance fund", amount:400,  amountPT:200,  category:"Fixed" },
+    { id:8,  name:"Electricity",                     amount:100,  amountPT:100,  category:"Utilities" },
+    { id:9,  name:"Health insurance",                amount:300,  amountPT:300,  category:"Fixed" },
+    { id:10, name:"Phone",                           amount:100,  amountPT:100,  category:"Utilities" },
+    { id:11, name:"Child costs",                     amount:150,  amountPT:150,  category:"Family" },
+    { id:12, name:"Kids' activities",                amount:150,  amountPT:75,   category:"Family" },
+    { id:13, name:"Eating out",                      amount:150,  amountPT:50,   category:"Food" },
+    { id:14, name:"Home maintenance sinking fund",   amount:100,  amountPT:50,   category:"Sinking Fund" },
+    { id:15, name:"Personal spending",               amount:750,  amountPT:200,  category:"Other" },
+    { id:16, name:"Gifts & socialising fund",        amount:150,  amountPT:0,    category:"Sinking Fund" },
+  ];
+  let items = [];
+  function load() { try { const s=localStorage.getItem("budget-items-html"); items=s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_ITEMS)); } catch { items=JSON.parse(JSON.stringify(DEFAULT_ITEMS)); } render(); }
+  function save() { localStorage.setItem("budget-items-html",JSON.stringify(items)); }
+  function fmt(n) { return "€"+Math.round(n).toLocaleString("en-IE"); }
+  function escHtml(str) { return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function render() {
+    const c=document.getElementById("rows-container"); c.innerHTML="";
+    items.forEach(item=>{
+      const row=document.createElement("div"); row.className="expense-row";
+      const ptClass=item.amountPT===0?"pt-zero":"pt-input";
+      row.innerHTML=`<div class="row-name-wrap"><input class="row-name" type="text" value="${escHtml(item.name)}" data-id="${item.id}" data-field="name"/><div class="row-cat">${escHtml(item.category)}</div></div><input class="amount-input ft-input" type="number" min="0" value="${item.amount}" data-id="${item.id}" data-field="amount"/><input class="amount-input ${ptClass}" type="number" min="0" value="${item.amountPT}" data-id="${item.id}" data-field="amountPT"/><button class="del-btn" data-id="${item.id}" title="Delete">✕</button>`;
+      c.appendChild(row);
+    });
+    c.querySelectorAll("input[data-field]").forEach(i=>{i.addEventListener("input",onInput);i.addEventListener("change",onInput);});
+    c.querySelectorAll(".del-btn").forEach(b=>b.addEventListener("click",()=>deleteItem(parseInt(b.dataset.id))));
+    updateTotals();
+  }
+  function onInput(e) {
+    const id=parseInt(e.target.dataset.id),field=e.target.dataset.field,item=items.find(i=>i.id===id);
+    if(!item)return;
+    if(field==="name"){item.name=e.target.value;}
+    else{item[field]=isNaN(parseFloat(e.target.value))?0:parseFloat(e.target.value);if(field==="amountPT")e.target.className="amount-input "+(item.amountPT===0?"pt-zero":"pt-input");}
+    save();updateTotals();
+  }
+  function deleteItem(id){if(!confirm("Remove this expense?"))return;items=items.filter(i=>i.id!==id);save();render();}
+  function updateTotals() {
+    const ftTotal=items.reduce((s,i)=>s+(i.amount||0),0),ptTotal=items.reduce((s,i)=>s+(i.amountPT||0),0);
+    const ftS=FT_INCOME-ftTotal,ptS=PT_INCOME-ptTotal;
+    document.getElementById("ft-total").textContent=fmt(ftTotal);
+    document.getElementById("pt-total").textContent=fmt(ptTotal);
+    const fe=document.getElementById("ft-surplus");fe.textContent=(ftS>=0?"+":"")+fmt(ftS);fe.className="total-val "+(ftS>=0?"positive":"negative");
+    const pe=document.getElementById("pt-surplus");pe.textContent=(ptS>=0?"+":"")+fmt(ptS);pe.className="total-val "+(ptS>=0?"positive":"negative");
+  }
+  function showAddForm(){document.getElementById("add-form").classList.add("visible");document.getElementById("add-trigger").style.display="none";document.getElementById("new-name").focus();}
+  function hideAddForm(){document.getElementById("add-form").classList.remove("visible");document.getElementById("add-trigger").style.display="flex";document.getElementById("new-name").value="";document.getElementById("new-ft").value="";document.getElementById("new-pt").value="";}
+  function addItem(){const n=document.getElementById("new-name").value.trim();if(!n){document.getElementById("new-name").focus();return;}items.push({id:Date.now(),name:n,amount:parseFloat(document.getElementById("new-ft").value)||0,amountPT:parseFloat(document.getElementById("new-pt").value)||0,category:document.getElementById("new-cat").value});save();render();hideAddForm();}
+  document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("add-form").classList.contains("visible"))addItem();if(e.key==="Escape"&&document.getElementById("add-form").classList.contains("visible"))hideAddForm();});
+  load();
+</script>
+</body>
+</html>
+
